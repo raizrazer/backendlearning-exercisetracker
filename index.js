@@ -52,21 +52,38 @@ app.get("/api/users", async (req, res) => {
   res.json(UserList);
 });
 
-app.get("/api/users/:_id/logs", async (req, res) => {
+app.get("/api/users/:_id/logs/", async (req, res) => {
   const userId = req.params._id;
-  const userFound = await User.findById(userId).select(["-__v"]);
-  const logsFound = await Exercise.find({ userId: userId })
-    .select(["description", "date", "duration", "-_id"])
-    .where({ dateValue: { $gte: "1987-10-19", $lte: "2023-10-26" } })
-    .limit(7)
-    .exec();
-  const concat = {
-    _id: userFound._id,
-    username: userFound.username,
-    count: logsFound.length,
-    log: logsFound,
-  };
-  res.json(concat);
+  const from = req.query.from;
+  const to = req.query.to;
+  const limit = req.query.limit;
+  if (from && to && limit) {
+    const userFound = await User.findById(userId).select(["-__v"]);
+    const logsFound = await Exercise.find({ userId: userId })
+      .select(["description", "date", "duration", "-_id"])
+      .where({ dateValue: { $gte: from, $lte: to } })
+      .limit(limit)
+      .exec();
+    const concat = {
+      _id: userFound._id,
+      username: userFound.username,
+      count: logsFound.length,
+      log: logsFound,
+    };
+    res.json(concat);
+  } else {
+    const userFound = await User.findById(userId).select(["-__v"]);
+    const logsFound = await Exercise.find({ userId: userId })
+      .select(["description", "date", "duration", "-_id"])
+      .exec();
+    const concat = {
+      _id: userFound._id,
+      username: userFound.username,
+      count: logsFound.length,
+      log: logsFound,
+    };
+    res.json(concat);
+  }
 });
 
 app.post("/api/users/:_id/exercises", async (req, res) => {
