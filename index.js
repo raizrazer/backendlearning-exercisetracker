@@ -21,6 +21,7 @@ const exerciseSchema = new Schema({
   description: { type: String, required: true },
   duration: { type: Number, required: true },
   date: { type: String, required: true },
+  dateMilli: { type: Number, required: true },
 });
 
 const User = mongoose.model("User", userSchema);
@@ -56,7 +57,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
   const userFound = await User.findById(userId).select(["-__v"]);
   const logsFound = await Exercise.find({ userId: userId })
     .select(["description", "date", "duration", "-_id"])
-    // .where({ date: { $lt: "2015", $gt: "1980" } })
+    .where({ dateMilli: { $lt: 1133740900000, $gt: 376358000000 } })
     .limit(7)
     .exec();
   const concat = {
@@ -79,6 +80,10 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
       new Date(bodyData.date).toDateString() != "Invalid Date"
         ? new Date(bodyData.date).toDateString()
         : new Date().toDateString(),
+    dateMilli:
+      new Date(bodyData.date).toDateString() != "Invalid Date"
+        ? new Date(bodyData.date).getTime()
+        : new Date().getTime(),
   });
   await valueToPush.save();
   await User.findByIdAndUpdate(id, {
