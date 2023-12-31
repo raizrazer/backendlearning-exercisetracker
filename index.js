@@ -21,7 +21,7 @@ const exerciseSchema = new Schema({
   description: { type: String, required: true },
   duration: { type: Number, required: true },
   date: { type: String, required: true },
-  dateMilli: { type: Number, required: true },
+  dateValue: { type: Date, required: true },
 });
 
 const User = mongoose.model("User", userSchema);
@@ -57,13 +57,13 @@ app.get("/api/users/:_id/logs", async (req, res) => {
   const userFound = await User.findById(userId).select(["-__v"]);
   const logsFound = await Exercise.find({ userId: userId })
     .select(["description", "date", "duration", "-_id"])
-    .where({ dateMilli: { $lt: 1133740900000, $gt: 376358000000 } })
+    .where({ dateValue: { $gte: "1987-10-19", $lte: "2023-10-26" } })
     .limit(7)
     .exec();
   const concat = {
     _id: userFound._id,
     username: userFound.username,
-    count: userFound.count,
+    count: logsFound.length,
     log: logsFound,
   };
   res.json(concat);
@@ -76,14 +76,11 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     userId: id,
     description: bodyData.description,
     duration: bodyData.duration,
+    dateValue: bodyData.date,
     date:
       new Date(bodyData.date).toDateString() != "Invalid Date"
         ? new Date(bodyData.date).toDateString()
         : new Date().toDateString(),
-    dateMilli:
-      new Date(bodyData.date).toDateString() != "Invalid Date"
-        ? new Date(bodyData.date).getTime()
-        : new Date().getTime(),
   });
   await valueToPush.save();
   await User.findByIdAndUpdate(id, {
