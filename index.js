@@ -71,6 +71,9 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   await User.findByIdAndUpdate(id, {
     $push: { log: valueToPush },
   });
+  await User.findByIdAndUpdate(id, {
+    $inc: { count: 1 },
+  });
   const pushedValue = await User.findById(id);
   res.json({
     _id: id,
