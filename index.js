@@ -93,7 +93,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     userId: id,
     description: bodyData.description,
     duration: bodyData.duration,
-    dateValue: bodyData.date,
+    dateValue: bodyData.date ? bodyData.date : new Date().toISOString(),
     date:
       new Date(bodyData.date).toDateString() != "Invalid Date"
         ? new Date(bodyData.date).toDateString()
