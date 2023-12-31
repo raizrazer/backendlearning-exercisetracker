@@ -36,10 +36,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(upload.array());
 app.use(express.static("public"));
 
-app.use((req, res) => {
-  console.log(req.url);
-});
-
 app.post("/api/users", async (req, res) => {
   if (req.body) {
     const createdUser = await User.create({
@@ -56,14 +52,14 @@ app.get("/api/users", async (req, res) => {
   res.json(UserList);
 });
 
-app.get("/api/users/:_id/logs", async (req, res) => {
-  const userId = req.params._id;
+app.get("/api/users/:userIdToSearch/logs", async (req, res) => {
+  const userIdToSearch = req.params.userIdToSearch;
   const from = req.query.from;
   const to = req.query.to;
   const limit = req.query.limit;
   if (from && to && limit) {
-    const userFound = await User.findById(userId).select(["-__v"]);
-    const logsFound = await Exercise.find({ userId: userId })
+    const userFound = await User.findById(userIdToSearch).select(["-__v"]);
+    const logsFound = await Exercise.find({ userId: userIdToSearch })
       .select(["description", "date", "duration", "-_id"])
       .where({ dateValue: { $gte: from, $lte: to } })
       .limit(limit)
@@ -76,8 +72,8 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     };
     res.json(concat);
   } else {
-    const userFound = await User.findById(userId).select(["-__v"]);
-    const logsFound = await Exercise.find({ userId: userId })
+    const userFound = await User.findById(userIdToSearch).select(["-__v"]);
+    const logsFound = await Exercise.find({ userId: userIdToSearch })
       .select(["description", "date", "duration", "-_id"])
       .exec();
     const concat = {
