@@ -45,7 +45,7 @@ app.post("/api/users", async (req, res) => {
       count: 0,
     });
     // console.log(createdUser);
-    res.json({ username: createdUser.username, id: createdUser._id });
+    res.json({ username: createdUser.username, _id: createdUser._id });
   }
 });
 
