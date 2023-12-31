@@ -56,8 +56,8 @@ app.get("/api/users/:userIdToSearch/logs", async (req, res) => {
   const userIdToSearch = req.params.userIdToSearch;
   const from = req.query.from;
   const to = req.query.to;
-  const limit = req.query.limit;
-  if (from && to && limit) {
+  const limit = req.query.limit || 0;
+  if (from && to) {
     const userFound = await User.findById(userIdToSearch).select(["-__v"]);
     const logsFound = await Exercise.find({
       userId: userIdToSearch,
@@ -77,6 +77,7 @@ app.get("/api/users/:userIdToSearch/logs", async (req, res) => {
     const userFound = await User.findById(userIdToSearch).select(["-__v"]);
     const logsFound = await Exercise.find({ userId: userIdToSearch })
       .select(["description", "date", "duration", "-_id"])
+      .limit(limit)
       .exec();
     const concat = {
       _id: userFound._id,
