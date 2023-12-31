@@ -59,9 +59,11 @@ app.get("/api/users/:userIdToSearch/logs", async (req, res) => {
   const limit = req.query.limit;
   if (from && to && limit) {
     const userFound = await User.findById(userIdToSearch).select(["-__v"]);
-    const logsFound = await Exercise.find({ userId: userIdToSearch })
+    const logsFound = await Exercise.find({
+      userId: userIdToSearch,
+      dateValue: { $gte: from, $lte: to },
+    })
       .select(["description", "date", "duration", "-_id"])
-      .where({ dateValue: { $gte: from, $lte: to } })
       .limit(limit)
       .exec();
     const concat = {
