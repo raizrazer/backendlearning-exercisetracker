@@ -36,6 +36,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(upload.array());
 app.use(express.static("public"));
 
+app.use((req, res) => {
+  console.log(req.url);
+});
+
 app.post("/api/users", async (req, res) => {
   if (req.body) {
     const createdUser = await User.create({
