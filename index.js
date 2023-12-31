@@ -52,7 +52,7 @@ app.get("/api/users", async (req, res) => {
   res.json(UserList);
 });
 
-app.get("/api/users/:_id/logs/", async (req, res) => {
+app.get("/api/users/:_id/logs", async (req, res) => {
   const userId = req.params._id;
   const from = req.query.from;
   const to = req.query.to;
