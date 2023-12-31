@@ -66,7 +66,10 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   const valueToPush = new Exercise({
     description: bodyData.description,
     duration: bodyData.duration,
-    date: new Date(bodyData.date).toDateString() || new Date().toDateString(),
+    date:
+      new Date(bodyData.date).toDateString() != "Invalid Date"
+        ? new Date(bodyData.date).toDateString()
+        : new Date().toDateString(),
   });
   await User.findByIdAndUpdate(id, {
     $push: { log: valueToPush },
