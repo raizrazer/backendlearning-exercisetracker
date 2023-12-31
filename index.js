@@ -14,20 +14,17 @@ const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
   username: String,
-  log: [{ description: String, duration: Number, date: String, _id: false }],
   count: Number,
 });
-const exerciseSchema = new Schema(
-  {
-    description: { type: String, required: true },
-    duration: { type: Number, required: true },
-    date: { type: String, required: true },
-  },
-  { _id: false }
-);
+const exerciseSchema = new Schema({
+  userId: { type: String, required: true },
+  description: { type: String, required: true },
+  duration: { type: Number, required: true },
+  date: { type: String, required: true },
+});
 
 const User = mongoose.model("User", userSchema);
-const Exercise = mongoose.model("Log", exerciseSchema);
+const Exercise = mongoose.model("Exercise", exerciseSchema);
 app.use(cors());
 app.use(express.static("public"));
 app.get("/", (req, res) => {
@@ -55,15 +52,27 @@ app.get("/api/users", async (req, res) => {
 });
 
 app.get("/api/users/:_id/logs", async (req, res) => {
-  const id = req.params._id;
-  const foundUser = await User.findById(id).select(["-__v"]).exec();
-  res.json(foundUser);
+  const userId = req.params._id;
+  const userFound = await User.findById(userId).select(["-__v"]);
+  const logsFound = await Exercise.find({ userId: userId })
+    .select(["description", "date", "duration", "-_id"])
+    // .where({ date: { $lt: "2015", $gt: "1980" } })
+    .limit(7)
+    .exec();
+  const concat = {
+    _id: userFound._id,
+    username: userFound.username,
+    count: userFound.count,
+    log: logsFound,
+  };
+  res.json(concat);
 });
 
 app.post("/api/users/:_id/exercises", async (req, res) => {
   const id = req.params._id;
   const bodyData = req.body;
   const valueToPush = new Exercise({
+    userId: id,
     description: bodyData.description,
     duration: bodyData.duration,
     date:
@@ -71,9 +80,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
         ? new Date(bodyData.date).toDateString()
         : new Date().toDateString(),
   });
-  await User.findByIdAndUpdate(id, {
-    $push: { log: valueToPush },
-  });
+  await valueToPush.save();
   await User.findByIdAndUpdate(id, {
     $inc: { count: 1 },
   });
